@@ -51,7 +51,7 @@ exports.createUser = async (req, res) => {
             }))
         //password confirmation
         if (body.password != body.confirmPassword) {
-            return res.sent(formatResult({
+            return res.send(formatResult({
                 status: 400,
                 message: "passwords do not match"
             }))
@@ -118,7 +118,7 @@ exports.userUpdate = async (req, res) => {
                 message: "the user you're trying to update does not exist",
             }))
         if (res.password != req.confirmPassword)
-            return res.sent(formatResult({
+            return res.send(formatResult({
                 status: 400,
                 message: "passwords do not match"
             }))
