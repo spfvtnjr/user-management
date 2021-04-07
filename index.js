@@ -1,18 +1,17 @@
-const express = require('express');
+require("./Models/database");
 const dotenv = require('dotenv');
 dotenv.config()
-require("./Models/database");
-// const cors = require("cors");
-const { userRoutes } = require('./routes/routes');
 const { formatResult } = require('./utilis/imports');
+const express = require('express');
 const app = express()
 const bodyParser = require('body-parser');
+const { userRoutes } = require("./routes/routes");
 app.use(bodyParser.urlencoded({
     extended: true
 }))
-app.use(bodyParser.json);
+app.use(bodyParser.json());
 const port = process.env.PORT || 8000;
-app.use("/api/users",userRoutes)
+app.use('/api/users',userRoutes)
 app.use("/",(req,res)=>{
     res.send(formatResult({
         status:200,
@@ -21,3 +20,4 @@ app.use("/",(req,res)=>{
 })
 
 app.listen(port, () => console.log(`Listening on port ${port} ....`))
+

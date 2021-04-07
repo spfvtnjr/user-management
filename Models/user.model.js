@@ -26,12 +26,11 @@ password:{
 exports.userValidation=(user)=>{
     const schema=joi.object({
         username:joi.string().min(5).max(50).required(),
-        email:joi.string().min(11).max(250).email().require(),
-        password:joi.string().min(6).max(50).require(),
+        email:joi.string().min(11).max(250).email().required(),
+        password:joi.string().min(6).max(50).required(),
         confirmPassword:joi.string().required()
     })
-    return joi.validate(user,schema)
+    return schema.validate(user)
 }
 module.exports.user=model("user",userschema)
-
 
