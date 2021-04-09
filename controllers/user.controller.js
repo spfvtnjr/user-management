@@ -1,6 +1,13 @@
+const bcrypt = require('bcrypt');
+const {
+    auth
+} = require('../middlewares/authentication');
+const admin = require('../middlewares/isAdmin');
+
 const {
     user,
     userValidation,
+    loginValidation,
 } = require('../Models/user.model');
 const {
     formatResult
@@ -75,13 +82,14 @@ exports.createUser = async (req, res) => {
                 message: "with the same username already exists"
             }))
         //hashing password
-        const saltRounds = await bycrypt.genSalt(10);
-        const hashedPassword = await bycrypt.hash(body.password, saltRounds)
+        const saltRounds = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(body.password, saltRounds)
         body.password = hashedPassword
 
         const newUser = new user(body)
         await newUser.save()
-        return (
+
+        return res.send(
             formatResult({
                 status: 200,
                 message: "new user registered successfully",
@@ -123,8 +131,8 @@ exports.userUpdate = async (req, res) => {
                 message: "passwords do not match"
             }))
         //hashing the password 
-        const saltRounds = await bycrypt.genSalt(10)
-        const hashedPassword = await bycrypt.hash(body.password, saltRounds)
+        const saltRounds = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(body.password, saltRounds)
         body.password = hashedPassword
         const updatedUser = await user.findOneAndUpdate({
             _id: req.params.id
@@ -160,6 +168,45 @@ exports.userDeletion = async (req, res) => {
     } catch (error) {
         res.send(formatResult({
             status: 500,
+            message: error
+        }))
+    }
+}
+exports.userLogin = async (req, res) => {
+    try {
+        //validating the body
+        const {
+            error
+        } = loginValidation(req.body)
+        if (error)
+            return res.send(formatResult({
+                status: 401,
+                message: error
+            }))
+        //finding if the user exists
+        const userw = await user.findOne({
+            email: req.body.email
+        })
+        if (!userw)
+            return res.send(formatResult({
+                status: 404,
+                message: "Invalid email or password"
+            }))
+        //comparing passwords
+        const validpwd = await bcrypt.compare(req.body.password,userw.password)
+        if (!validpwd)
+            return res.send({
+                status: 404,
+                message: "invalid email or password"
+            })
+        res.send(formatResult({
+            status: 200,
+            message: "Loged in succesfully",
+            data: await user.generateAuthToken()
+        }))
+    } catch (error) {
+        res.send(formatResult({
+            status: 401,
             message: error
         }))
     }
